@@ -1,0 +1,3256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local Player</title>
+<link rel="icon" href="icon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+<style>
+  :root {
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-size-base: 14.5px;
+    --font-size-sm: 12.5px;
+    --font-size-lg: 18px;
+    --font-weight-light: 300;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --radius-xs: 8px;
+    --radius-sm: 12px;
+    --radius-md: 18px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 80px;
+    --content-max: 1600px;
+    --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 18px 48px rgba(0, 0, 0, 0.2);
+    --shadow-glow: 0 0 30px rgba(0, 255, 194, 0.15);
+    --transition: 280ms cubic-bezier(0.25, 1, 0.4, 1);
+  }
+
+  body[data-theme="dark"] {
+    --bg: #0A0A0C;
+    --surface: rgba(22, 22, 28, 0.72);
+    --surface-strong: #141418;
+    --surface-raised: #1C1C24;
+    --surface-muted: rgba(255, 255, 255, 0.03);
+    --surface-soft: rgba(255, 255, 255, 0.06);
+    --border: rgba(255, 255, 255, 0.06);
+    --border-strong: rgba(255, 255, 255, 0.11);
+    --text: #F2F0EC;
+    --text-dim: #8A8880;
+    --text-soft: #5A5855;
+    --primary: #F5B731;
+    --primary-hover: #E8A520;
+    --secondary: #8B5CF6;
+    --success: #4A9E74;
+    --warning: #C4843A;
+    --danger: #E05A4A;
+    --accent-dim: rgba(245, 183, 49, 0.13);
+    --accent-border: rgba(245, 183, 49, 0.28);
+    --badge-bg: rgba(255, 255, 255, 0.05);
+    --badge-text: #E4E4E7;
+    --thumb-fallback: linear-gradient(180deg, rgba(22, 22, 28, 0.8), rgba(10, 10, 12, 1));
+    --app-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 18px 48px rgba(0, 0, 0, 0.2);
+    --plyr-color-main: var(--primary);
+    --plyr-video-control-background-hover: rgba(255, 255, 255, 0.1);
+    --plyr-video-control-color-hover: var(--primary);
+    --plyr-menu-background: rgba(20, 20, 24, 0.92);
+    --plyr-menu-color: var(--text);
+    --plyr-tooltip-background: rgba(0, 0, 0, 0.85);
+    --plyr-tooltip-color: #fff;
+    --plyr-range-fill-background: var(--primary);
+    --plyr-video-progress-buffered-background: rgba(255, 255, 255, 0.15);
+    --plyr-control-radius: 12px;
+    --plyr-range-track-height: 6px;
+    --plyr-range-thumb-height: 14px;
+    --plyr-range-thumb-background: var(--primary);
+  }
+
+  body[data-theme="light"] {
+    --bg: #F7F5F0;
+    --surface: rgba(255, 255, 255, 0.75);
+    --surface-strong: #FFFDF8;
+    --surface-raised: #F0EDE6;
+    --surface-muted: rgba(0, 0, 0, 0.02);
+    --surface-soft: rgba(0, 0, 0, 0.05);
+    --border: rgba(0, 0, 0, 0.06);
+    --border-strong: rgba(0, 0, 0, 0.12);
+    --text: #18181B;
+    --text-dim: #52525B;
+    --text-soft: #A1A1AA;
+    --primary: #D48A0A;
+    --primary-hover: #BF7A00;
+    --secondary: #7C3AED;
+    --success: #3A8C5E;
+    --warning: #C4843A;
+    --danger: #C53A2E;
+    --accent-dim: rgba(212, 138, 10, 0.1);
+    --accent-border: rgba(212, 138, 10, 0.24);
+    --badge-bg: rgba(0, 0, 0, 0.04);
+    --badge-text: #27272A;
+    --thumb-fallback: linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.05));
+    --app-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 18px 48px rgba(0, 0, 0, 0.12);
+    --plyr-color-main: var(--primary);
+    --plyr-video-control-background-hover: rgba(0, 0, 0, 0.05);
+    --plyr-video-control-color-hover: var(--primary);
+    --plyr-menu-background: rgba(255, 255, 255, 0.95);
+    --plyr-menu-color: var(--text);
+    --plyr-tooltip-background: rgba(24, 24, 27, 0.9);
+    --plyr-tooltip-color: #fff;
+    --plyr-range-fill-background: var(--primary);
+    --plyr-video-progress-buffered-background: rgba(0, 0, 0, 0.1);
+    --plyr-control-radius: 12px;
+    --plyr-range-track-height: 6px;
+    --plyr-range-thumb-height: 14px;
+    --plyr-range-thumb-background: var(--primary);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-regular);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button,
+  input {
+    font: inherit;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: var(--font-weight-medium);
+    letter-spacing: -0.01em;
+  }
+
+  .app-shell {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    background: transparent;
+    transition: grid-template-columns var(--transition);
+  }
+  .app-shell.sidebar-collapsed {
+    grid-template-columns: var(--sidebar-collapsed-width) minmax(0, 1fr);
+  }
+
+  .sidebar {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 20px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent), var(--surface-strong);
+    border-right: 1px solid var(--border);
+    backdrop-filter: blur(24px);
+    z-index: 100;
+    transition: width var(--transition), padding var(--transition);
+    overflow: hidden;
+  }
+  .app-shell.sidebar-collapsed .sidebar {
+    padding: 24px 12px;
+  }
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+    padding: 0 4px;
+    cursor: pointer;
+  }
+
+  .sidebar-logo-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--primary);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    min-width: 0;
+    transition: opacity var(--transition);
+  }
+  .app-shell.sidebar-collapsed .logo-text {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .logo-kicker {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 2px;
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .logo-title {
+    font-size: 20px;
+    font-weight: var(--font-weight-bold);
+    color: var(--text);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    color: var(--text-dim);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+    border: 1px solid transparent;
+  }
+  .nav-item:hover {
+    background: var(--surface-soft);
+    color: var(--text);
+  }
+  .nav-item.active {
+    background: transparent;
+    color: var(--text);
+    border-color: transparent;
+    box-shadow: inset 2px 0 0 var(--primary);
+  }
+
+  .nav-icon {
+    font-size: 20px;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  
+  .nav-label {
+    white-space: nowrap;
+    transition: opacity var(--transition);
+  }
+  .app-shell.sidebar-collapsed .nav-label {
+    opacity: 0;
+  }
+
+  .sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: auto;
+  }
+
+  .sidebar-toggle {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: color var(--transition);
+    background: transparent;
+    border: none;
+    justify-content: flex-end;
+  }
+  .sidebar-toggle:hover {
+    color: var(--text);
+  }
+  .sidebar-toggle .nav-icon {
+    display: inline-block;
+    transition: transform var(--transition);
+  }
+  .app-shell.sidebar-collapsed .sidebar-toggle .nav-icon {
+    transform: rotate(180deg);
+  }
+
+  .content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px 16px;
+    gap: 20px;
+  }
+
+  .header-badges {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .shell-badge {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-soft);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+    backdrop-filter: blur(10px);
+  }
+  .shell-badge.playing {
+    background: rgba(0, 255, 194, 0.1);
+    border-color: rgba(0, 255, 194, 0.2);
+    color: var(--primary);
+  }
+
+  .btn-primary {
+    padding: 12px 20px;
+    background: var(--primary);
+    color: #0A0A0C;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background var(--transition), opacity var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-primary:hover {
+    background: var(--primary-hover);
+  }
+
+  .sort-btn {
+    padding: 11px 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+  }
+  .sort-btn:hover {
+    background: var(--surface-raised);
+    border-color: var(--border-strong);
+  }
+
+  .ffmpeg-warn {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(253, 126, 20, 0.12);
+    color: #fdc06b;
+    border: 1px solid rgba(253, 126, 20, 0.18);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+  body[data-theme="light"] .ffmpeg-warn {
+    color: #a35f06;
+  }
+  .ffmpeg-warn.visible { display: inline-flex; }
+
+  .scroll-area {
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 28px;
+  }
+
+  .scroll-area::-webkit-scrollbar {
+    width: 10px;
+  }
+  .scroll-area::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scroll-area::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    background: rgba(127, 138, 176, 0.32);
+    border-radius: 999px;
+    background-clip: padding-box;
+  }
+  .scroll-area::-webkit-scrollbar-thumb:hover {
+    background: rgba(127, 138, 176, 0.54);
+    background-clip: padding-box;
+  }
+
+  .content-shell {
+    width: min(var(--content-max), 100%);
+    margin: 0 auto;
+    display: grid;
+    gap: 24px;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--app-shadow);
+    backdrop-filter: blur(16px);
+  }
+
+  .player-panel {
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    border-radius: 0;
+    overflow: visible;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding: 0 10px;
+  }
+
+  .panel-title {
+    font-size: 28px;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.02em;
+  }
+
+  .panel-head-side {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .mini-chip {
+    padding: 8px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-muted);
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .mini-chip.primary {
+    background: rgba(33, 150, 243, 0.12);
+    color: var(--badge-text);
+  }
+
+  .player-empty {
+    display: grid;
+    place-items: center;
+    min-height: 480px;
+    border-radius: 12px;
+    border: 1px solid var(--border-strong);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2)), var(--surface-muted);
+    backdrop-filter: blur(24px);
+    text-align: center;
+    padding: 40px;
+    box-shadow: inset 0 2px 20px rgba(255,255,255,0.02);
+  }
+
+  .player-empty.hidden {
+    display: none;
+  }
+
+  .player-empty-icon {
+    width: 88px;
+    height: 88px;
+    border-radius: 26px;
+    background: transparent;
+    color: var(--primary);
+    display: grid;
+    place-items: center;
+    font-size: 42px;
+    margin: 0 auto 24px;
+    border: 1px solid var(--border-strong);
+    box-shadow: none;
+  }
+
+  .player-empty-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .player-empty-sub {
+    max-width: 440px;
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.65;
+  }
+
+  .player-wrap {
+    display: block;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+    background: #000;
+    margin: 0 auto;
+    width: min(100%, calc(75vh * 1.7778));
+  }
+  .player-wrap.hidden {
+    display: none;
+  }
+
+  .player-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #000;
+  }
+
+  .player-stage {
+    position: relative;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+  }
+
+  video {
+    width: 100%;
+    display: block;
+    background: transparent;
+    object-fit: contain;
+  }
+  .plyr:fullscreen video,
+  .plyr:fullscreen .player-stage,
+  .plyr--fullscreen-fallback video,
+  .plyr--fullscreen-fallback .player-stage { max-height: none; height: 100%; }
+
+  .plyr { border-radius: 0; width: 100%; display: block; border: none; outline: none; }
+  .plyr--video { background: #000; border: none; outline: none; }
+  .plyr__video-wrapper { border-radius: 0; overflow: hidden; }
+  .plyr__controls {
+    flex-wrap: wrap;
+    justify-content: flex-start !important;
+    padding: 40px 24px 20px !important;
+    border-radius: 0 0 12px 12px;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.9)) !important;
+  }
+  .plyr__controls .plyr__time--current { margin-left: auto !important; }
+  .plyr__controls [data-plyr="rewind"] { margin-right: 2px !important; }
+  .plyr__menu__container, .plyr__control, .plyr__controls, .plyr__tooltip { font-family: inherit; }
+  .plyr__progress__container {
+    position: relative;
+    touch-action: pan-y;
+    flex-basis: 100% !important;
+    width: 100%;
+    order: -1;
+    padding: 12px 0 6px !important;
+    margin-left: 0 !important;
+  }
+  .plyr__progress { border-radius: 999px; }
+  .plyr__progress .plyr__tooltip { display: none; }
+  .plyr__progress input[type=range] { height: var(--plyr-range-track-height); }
+  .plyr__preview-scrubbing { filter: drop-shadow(0 8px 18px rgba(0,0,0,.42)); }
+
+  .status-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    backdrop-filter: blur(12px);
+    z-index: 20;
+    pointer-events: none;
+  }
+  .status-overlay.hidden { display: none; }
+
+  .spinner {
+    width: 46px;
+    height: 46px;
+    border: 4px solid rgba(255,255,255,.18);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status-text {
+    margin-top: 14px;
+    font-size: 15px;
+    color: rgba(255,255,255,.88);
+  }
+  .error-text { color: #ff8f8f; }
+
+  .video-info {
+    margin-top: 16px;
+    display: none;
+    padding: 2px 2px 0;
+  }
+  .video-info.visible { display: block; }
+  .video-info-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 10px;
+    word-break: break-word;
+  }
+  .video-info-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .video-info-meta span {
+    padding: 7px 11px;
+    border-radius: 6px;
+    background: var(--badge-bg);
+    color: var(--badge-text);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    border: 1px solid var(--border);
+  }
+
+  .metadata-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 440px;
+    max-width: 100%;
+    z-index: 15;
+    padding: 32px 24px;
+    background: var(--surface);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border-left: 1px solid var(--border-strong);
+    overflow-y: auto;
+    overflow-x: hidden;
+    transform: translateX(100%);
+    transition: transform var(--transition);
+    visibility: hidden;
+  }
+  .metadata-panel.open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+  .metadata-panel::-webkit-scrollbar { width: 6px; }
+  .metadata-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+  .metadata-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .metadata-refresh-btn {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+  }
+
+  .metadata-refresh-btn:hover {
+    background: var(--surface-raised);
+    border-color: var(--border-strong);
+  }
+
+  .metadata-status {
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .metadata-provider-badges,
+  .metadata-candidate-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .metadata-provider-badges {
+    margin-top: 10px;
+    opacity: 0.9;
+  }
+
+  .metadata-panel.has-result .metadata-provider-badges {
+    margin-top: 0;
+    margin-bottom: 8px;
+    opacity: 0.72;
+  }
+
+  .metadata-provider-badge {
+    padding: 5px 9px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-soft);
+    font-size: 11px;
+    font-weight: var(--font-weight-medium);
+  }
+
+  .metadata-provider-badge.active {
+    background: var(--accent-dim);
+    border-color: var(--accent-border);
+    color: var(--text-dim);
+  }
+
+  .metadata-provider-badge.tmdb.active,
+  .metadata-provider-badge.letterboxd.active {
+    background: var(--accent-dim);
+    border-color: var(--accent-border);
+    color: var(--text-dim);
+  }
+
+  body[data-theme="light"] .metadata-provider-badge.tmdb.active,
+  body[data-theme="light"] .metadata-provider-badge.letterboxd.active {
+    background: var(--accent-dim);
+    border-color: var(--accent-border);
+    color: var(--text-dim);
+  }
+
+  body[data-theme="light"] .metadata-provider-badge.letterboxd.active {
+    background: var(--accent-dim);
+    border-color: var(--accent-border);
+    color: var(--text-dim);
+  }
+
+  .metadata-card {
+    display: grid;
+    grid-template-columns: 168px minmax(0, 1fr);
+    gap: 18px;
+    margin-top: 14px;
+  }
+
+  .metadata-card.hidden,
+  .metadata-poster.hidden,
+  .metadata-sources.hidden,
+  .metadata-note.hidden {
+    display: none;
+  }
+
+  .metadata-section {
+    margin-top: 12px;
+  }
+
+  .metadata-section.hidden,
+  .person-modal.hidden {
+    display: none;
+  }
+
+  .metadata-section-label {
+    margin-bottom: 8px;
+    color: var(--text);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .metadata-tag-list,
+  .metadata-cast-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .metadata-useful-list {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .metadata-useful-item {
+    padding: 12px 13px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    line-height: 1.55;
+    font-size: var(--font-size-sm);
+  }
+
+  .metadata-useful-item strong {
+    display: block;
+    color: var(--text);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+
+  .metadata-cast-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+    text-align: left;
+  }
+
+  .metadata-cast-chip:hover {
+    background: var(--surface-raised);
+    border-color: var(--border-strong);
+  }
+
+  .metadata-cast-role {
+    color: var(--text-soft);
+    font-size: 11px;
+  }
+
+  .metadata-poster {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background: var(--thumb-fallback);
+  }
+
+  .metadata-body {
+    min-width: 0;
+    display: grid;
+    gap: 12px;
+  }
+
+  .metadata-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 2px;
+  }
+
+  .metadata-match-title {
+    font-size: 28px;
+    font-weight: var(--font-weight-bold);
+    color: var(--text);
+    line-height: 1.15;
+  }
+
+  .metadata-score {
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: var(--accent-dim);
+    color: var(--text-dim);
+    border: 1px solid var(--accent-border);
+    font-size: 11px;
+    font-weight: var(--font-weight-medium);
+  }
+
+  .metadata-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .metadata-meta span {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.03);
+    color: var(--text-dim);
+    font-size: 12px;
+  }
+
+  .metadata-sources {
+    margin-top: -2px;
+  }
+
+  .metadata-sources .folder-tag {
+    opacity: 0.9;
+  }
+
+  .metadata-overview-wrap {
+    display: grid;
+    gap: 8px;
+  }
+
+  .metadata-overview {
+    color: var(--text-dim);
+    line-height: 1.65;
+    max-width: 100ch;
+    font-size: 14px;
+  }
+
+  .metadata-overview.collapsed {
+    display: -webkit-box;
+    line-clamp: 5;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .metadata-expand-btn {
+    width: fit-content;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .metadata-expand-btn.hidden,
+  .metadata-details.hidden {
+    display: none;
+  }
+
+  .metadata-details {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+
+  .metadata-details summary {
+    list-style: none;
+    cursor: pointer;
+    color: var(--text);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .metadata-details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .metadata-details summary::after {
+    content: 'Show more';
+    color: var(--text-soft);
+    font-weight: var(--font-weight-regular);
+    margin-left: 8px;
+  }
+
+  .metadata-details[open] summary::after {
+    content: 'Show less';
+  }
+
+  .metadata-details-body {
+    display: grid;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .metadata-note {
+    color: var(--text-soft);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+  }
+
+  .metadata-candidates {
+    margin-top: 2px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .metadata-candidates-title {
+    opacity: 0.9;
+  }
+
+  .metadata-candidates.hidden,
+  .settings-modal.hidden {
+    display: none;
+  }
+
+  .metadata-candidates-title {
+    margin-bottom: 10px;
+    color: var(--text);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .metadata-candidate-btn {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+  }
+
+  .metadata-candidate-btn:hover {
+    background: var(--surface-raised);
+    border-color: var(--border-strong);
+  }
+
+  .metadata-candidate-btn.active {
+    background: var(--accent-dim);
+    border-color: var(--accent-border);
+    color: var(--text);
+  }
+
+  .metadata-candidate-name {
+    display: block;
+    font-weight: var(--font-weight-medium);
+    color: inherit;
+  }
+
+  .metadata-candidate-meta {
+    display: block;
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--text-soft);
+  }
+
+  .settings-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+  }
+
+  .settings-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 10, 22, 0.7);
+    backdrop-filter: blur(10px);
+  }
+
+  .person-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 130;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+  }
+
+  .person-dialog {
+    position: relative;
+    width: min(760px, 100%);
+    max-height: min(88vh, 860px);
+    overflow: auto;
+    padding: 22px;
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent), var(--surface-strong);
+    box-shadow: var(--shadow-md);
+  }
+
+  .person-dialog::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .person-dialog::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(127, 138, 176, 0.42);
+  }
+
+  .person-head {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .person-poster {
+    width: 100%;
+    aspect-ratio: 2/3;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    object-fit: cover;
+    background: var(--thumb-fallback);
+  }
+
+  .person-body {
+    min-width: 0;
+  }
+
+  .person-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .person-name {
+    font-size: 24px;
+    font-weight: var(--font-weight-bold);
+    color: var(--text);
+  }
+
+  .person-close-btn {
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--surface-muted);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .person-subtitle {
+    margin-top: 8px;
+    color: var(--text-dim);
+    line-height: 1.55;
+  }
+
+  .person-meta,
+  .person-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .person-meta span,
+  .person-links span {
+    padding: 7px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    font-size: var(--font-size-sm);
+  }
+
+  .person-section {
+    margin-top: 16px;
+  }
+
+  .person-section-title {
+    margin-bottom: 8px;
+    color: var(--text);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .person-bio {
+    color: var(--text-dim);
+    line-height: 1.65;
+  }
+
+  .person-pill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .person-pill-list span {
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    font-size: var(--font-size-sm);
+  }
+
+  .settings-dialog {
+    position: relative;
+    width: min(560px, 100%);
+    padding: 22px;
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent), var(--surface-strong);
+    box-shadow: var(--shadow-md);
+  }
+
+  .settings-dialog-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .settings-dialog-subtitle {
+    margin-top: 6px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .settings-close-btn {
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--surface-muted);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .settings-form {
+    display: grid;
+    gap: 14px;
+  }
+
+  .settings-field {
+    display: grid;
+    gap: 8px;
+  }
+
+  .settings-field-label {
+    color: var(--text);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .settings-field-note {
+    color: var(--text-soft);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .settings-input {
+    width: 100%;
+    padding: 10px 0;
+    border: none;
+    border-bottom: 1px solid var(--border-strong);
+    border-radius: 0;
+    background: transparent;
+    color: var(--text);
+    outline: none;
+    transition: border-color var(--transition);
+  }
+
+  .settings-input:focus {
+    border-bottom-color: var(--primary);
+    box-shadow: none;
+    outline: none;
+  }
+
+  .settings-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+
+  .settings-status {
+    color: var(--text-dim);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+  }
+
+  .folder-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .folder-tags.hidden {
+    display: none;
+  }
+
+  .folder-tag {
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: var(--font-weight-medium);
+    line-height: 1;
+    cursor: pointer;
+    transition: transform var(--transition), filter var(--transition), border-color var(--transition);
+  }
+
+  .folder-tag:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+  }
+
+  .folder-tag.active {
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.08) inset;
+  }
+
+  .folder-tag.level-0 {
+    background: rgba(33, 150, 243, 0.16);
+    color: #8fd0ff;
+    border-color: rgba(33, 150, 243, 0.22);
+  }
+
+  .folder-tag.level-1 {
+    background: rgba(103, 58, 183, 0.18);
+    color: #cfb8ff;
+    border-color: rgba(103, 58, 183, 0.24);
+  }
+
+  .folder-tag.level-2 {
+    background: rgba(0, 200, 83, 0.16);
+    color: #9df0bf;
+    border-color: rgba(0, 200, 83, 0.22);
+  }
+
+  .folder-tag.level-3 {
+    background: rgba(255, 193, 7, 0.18);
+    color: #ffe28a;
+    border-color: rgba(255, 193, 7, 0.24);
+  }
+
+  .folder-tag.level-4 {
+    background: rgba(244, 67, 54, 0.18);
+    color: #ffb4ad;
+    border-color: rgba(244, 67, 54, 0.24);
+  }
+
+  body[data-theme="light"] .folder-tag.level-0 {
+    color: #0b63b5;
+    background: rgba(33, 150, 243, 0.12);
+  }
+
+  body[data-theme="light"] .folder-tag.level-1 {
+    color: #6a1fb3;
+    background: rgba(103, 58, 183, 0.12);
+  }
+
+  body[data-theme="light"] .folder-tag.level-2 {
+    color: #0c8c45;
+    background: rgba(0, 200, 83, 0.12);
+  }
+
+  body[data-theme="light"] .folder-tag.level-3 {
+    color: #9b6a00;
+    background: rgba(255, 193, 7, 0.14);
+  }
+
+  body[data-theme="light"] .folder-tag.level-4 {
+    color: #c53a2e;
+    background: rgba(244, 67, 54, 0.12);
+  }
+
+  .panel-title {
+    font-size: 20px;
+    font-weight: var(--font-weight-medium);
+    color: var(--text);
+  }
+
+  .sprite-progress {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: var(--surface-muted);
+    font-size: var(--font-size-base);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .sprite-progress.hidden { display: none; }
+  .sp-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(127, 138, 176, 0.18);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .sp-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 999px;
+    transition: width .3s;
+  }
+
+  .browser-section {
+    padding: 22px;
+  }
+
+  .browser-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .browser-header h2 {
+    font-size: 28px;
+    font-weight: var(--font-weight-bold);
+    color: var(--text);
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .video-count {
+    display: none;
+  }
+
+  .video-search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 280px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .video-search-wrap::before {
+    content: "⌕";
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-soft);
+    font-size: 20px;
+    pointer-events: none;
+  }
+
+  .video-search {
+    width: 100%;
+    padding: 14px 20px 14px 48px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-muted);
+    color: var(--text);
+    font-size: var(--font-size-base);
+    outline: none;
+    transition: all var(--transition);
+  }
+  .video-search:focus {
+    background: var(--surface);
+    border-color: var(--accent-border);
+    box-shadow: 0 0 0 3px var(--accent-dim), 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+  }
+  .video-search::placeholder { color: var(--text-soft); }
+
+  .filter-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent), var(--surface-muted);
+  }
+
+  .filter-strip.hidden {
+    display: none;
+  }
+
+  .filter-strip-main {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .filter-strip-label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    white-space: nowrap;
+  }
+
+  .filter-strip-empty {
+    font-size: var(--font-size-sm);
+    color: var(--text-dim);
+  }
+
+  .filter-strip-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .clear-filters-btn,
+  .view-toggle-btn {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+  }
+
+  .clear-filters-btn:hover,
+  .view-toggle-btn:hover {
+    background: var(--surface-raised);
+    border-color: var(--border-strong);
+  }
+
+  .clear-filters-btn.hidden {
+    display: none;
+  }
+
+  .player-breadcrumbs {
+    margin-top: 12px;
+  }
+
+  /* Shimmer skeleton for loading state */
+  .shimmer-card {
+    border-radius: 8px;
+    background: linear-gradient(90deg, var(--surface-raised) 25%, var(--surface-muted) 50%, var(--surface-raised) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+  .shimmer-card .shimmer-poster {
+    width: 100%;
+    aspect-ratio: 2/3;
+    border-radius: 8px;
+    background: inherit;
+  }
+  .shimmer-card .shimmer-line {
+    height: 11px;
+    border-radius: 4px;
+    margin-top: 10px;
+    background: rgba(255,255,255,0.05);
+  }
+  .shimmer-card .shimmer-line.short {
+    width: 60%;
+    margin-top: 6px;
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+
+  .browser-loading {
+    text-align: center;
+    padding: 46px 20px;
+    color: var(--text-dim);
+    background: var(--surface-muted);
+    border: 1px dashed var(--border-strong);
+    border-radius: 20px;
+    margin-bottom: 18px;
+  }
+  .browser-loading.hidden { display: none; }
+  .browser-loading .spinner { margin: 0 auto 12px; }
+
+  .movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 24px;
+  }
+
+  .movie-card {
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    overflow: visible;
+    cursor: pointer;
+    transition: transform var(--transition);
+    position: relative;
+  }
+  .movie-card:hover {
+    transform: translateY(-3px);
+    z-index: 2;
+  }
+  .movie-card.active .thumb-wrap {
+    box-shadow: 0 0 0 2px var(--primary);
+  }
+
+  .movie-card .thumb {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    display: block;
+    background: var(--thumb-fallback);
+  }
+
+  .movie-card .thumb-wrap {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    transition: border-color var(--transition), filter var(--transition);
+  }
+
+  .movie-card:hover .thumb-wrap {
+    border-color: var(--accent-border);
+    filter: brightness(1.08);
+  }
+
+  .movie-card .thumb.fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-soft);
+    background: var(--surface-raised);
+  }
+
+  .card-below {
+    padding: 10px 4px 4px;
+  }
+
+  .card-below .card-title {
+    font-size: 13px;
+    font-weight: var(--font-weight-medium);
+    color: var(--text);
+    line-height: 1.35;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+    margin-bottom: 3px;
+  }
+
+  .movie-card.active .card-below .card-title {
+    color: var(--primary);
+  }
+
+  .card-year {
+    font-size: 11px;
+    color: var(--text-soft);
+    margin-bottom: 4px;
+  }
+
+  .movie-card .thumb-wrap::after {
+    display: none;
+  }
+
+  /* Legacy overlay styles — unused in new card design */
+  .movie-card .card-info,
+  .movie-card .play-icon,
+  .movie-card .card-kicker,
+  .movie-card .card-bottomline,
+  .movie-card .card-tags,
+  .movie-card .card-meta {
+    display: none;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 88px 20px;
+    color: var(--text-dim);
+    text-align: center;
+    background: transparent;
+    border: 1px dashed var(--border-strong);
+    border-radius: 16px;
+  }
+  .empty-state.hidden { display: none; }
+  .empty-icon {
+    width: 72px;
+    height: 72px;
+    display: grid;
+    place-items: center;
+    color: var(--primary);
+    opacity: 0.6;
+    margin-bottom: 18px;
+  }
+  .empty-title {
+    font-size: 20px;
+    font-weight: var(--font-weight-medium);
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .empty-sub {
+    font-size: var(--font-size-base);
+    max-width: 480px;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 1180px) {
+    .browser-header {
+      grid-template-columns: 1fr;
+      align-items: stretch;
+    }
+
+    .panel-head {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .panel-head-side {
+      justify-content: flex-start;
+    }
+
+    .filter-strip {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .filter-strip-actions {
+      justify-content: flex-start;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .top-bar {
+      padding: 16px;
+    }
+
+    .top-bar-inner {
+      grid-template-columns: 1fr;
+    }
+
+    .top-bar-main {
+      flex-wrap: wrap;
+    }
+
+    .top-bar-actions {
+      justify-content: flex-start;
+    }
+
+    .scroll-area {
+      padding: 16px;
+    }
+
+    .browser-section,
+    .player-panel {
+      padding: 16px;
+    }
+
+    .movie-grid {
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .metadata-card {
+      grid-template-columns: 1fr;
+    }
+
+    .metadata-poster {
+      max-width: 220px;
+    }
+
+    .person-head {
+      grid-template-columns: 1fr;
+    }
+
+    .person-poster {
+      max-width: 220px;
+    }
+
+    .settings-dialog {
+      padding: 18px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .top-bar-main {
+      align-items: stretch;
+    }
+
+    .folder-pill {
+      width: 100%;
+    }
+
+    .top-bar-actions {
+      width: 100%;
+    }
+
+    .open-btn,
+    .theme-btn,
+    .sort-btn,
+    .settings-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+  }
+</style>
+</head>
+<body data-theme="dark">
+
+<div class="app-shell" id="appShell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8.5 5.86c0-1.12 1.23-1.8 2.18-1.2l9.64 5.92c.92.57.92 1.94 0 2.5l-9.64 5.92c-.95.59-2.18-.08-2.18-1.2V5.86z"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <div class="logo-kicker">Workspace</div>
+          <div class="logo-title">Local Player</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" id="navHome">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+          <span class="nav-label">Library</span>
+        </div>
+        <div class="nav-item" id="openBtn" onclick="openFolder()">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+          <span class="nav-label">Open Folder</span>
+        </div>
+        <div class="nav-item" id="metadataSettingsBtn">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="6" r="2.5" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="2.5" fill="currentColor" stroke="none"/><circle cx="12" cy="18" r="2.5" fill="currentColor" stroke="none"/></svg></span>
+          <span class="nav-label">Sources</span>
+        </div>
+        <div class="nav-item" id="themeBtn">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="3" x2="12" y2="21"/></svg></span>
+          <span class="nav-label">Theme</span>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="sidebar-toggle" id="sidebarToggle" onclick="document.getElementById('appShell').classList.toggle('sidebar-collapsed')">
+          <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></span>
+        </button>
+      </div>
+    </aside>
+
+    <div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden; position: relative;">
+      <div class="content-header">
+        <div class="header-badges">
+          <div class="shell-badge" id="headerLibraryBadge">0 Videos</div>
+          <div class="shell-badge playing" id="headerNowPlaying">Idle</div>
+          <div class="shell-badge" id="folderPath" style="background: transparent; border: none; color: var(--text-dim);">No folder selected</div>
+        </div>
+        <span class="ffmpeg-warn" id="ffmpegWarn">⚠ ffmpeg disabled</span>
+      </div>
+
+    <div class="scroll-area" id="scrollArea">
+      <div class="content-shell">
+        <section class="hero-grid">
+          <section class="panel player-panel">
+            <div class="panel-head">
+              <div class="panel-title">Video Player</div>
+              <div class="panel-head-side">
+                <div class="mini-chip primary" id="playerStatusChip">Ready</div>
+                <div class="mini-chip" id="playerThemeChip">Dark Mode</div>
+                <button class="sort-btn" style="padding: 6px 12px; font-weight: 600;" onclick="document.getElementById('metadataPanel').classList.toggle('open')">ℹ️ Info</button>
+              </div>
+            </div>
+
+            <div class="player-empty" id="playerEmpty">
+              <div>
+                <div class="player-empty-icon">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.5 5.86c0-1.12 1.23-1.8 2.18-1.2l9.64 5.92c.92.57.92 1.94 0 2.5l-9.64 5.92c-.95.59-2.18-.08-2.18-1.2V5.86z"/>
+                  </svg>
+                </div>
+                <div class="player-empty-title">Pick a video to begin</div>
+                <div class="player-empty-sub">Choose a title from the library below to load it into the player.</div>
+              </div>
+            </div>
+
+            <div class="player-wrap hidden" id="playerWrap">
+              <div class="player-container">
+                <div class="player-stage">
+                  <video id="video" playsinline></video>
+                  <div id="statusOverlay" class="status-overlay hidden">
+                    <div id="spinner" class="spinner"></div>
+                    <div id="statusText" class="status-text"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="video-info" id="videoInfo">
+              <div class="video-info-name" id="videoInfoName"></div>
+              <div class="video-info-meta" id="videoInfoMeta"></div>
+            </div>
+
+            <div class="metadata-panel" id="metadataPanel">
+              <div class="metadata-head">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <button class="settings-close-btn" style="padding: 6px 10px;" onclick="document.getElementById('metadataPanel').classList.remove('open')">✕</button>
+                  <div class="panel-title">Matched Metadata</div>
+                </div>
+                <button class="metadata-refresh-btn" id="metadataRefreshBtn" type="button">Refresh Match</button>
+              </div>
+              <div class="metadata-status" id="metadataStatus">Select a video to match metadata from online services.</div>
+              <div class="metadata-provider-badges" id="metadataProviderBadges"></div>
+              <div class="metadata-card hidden" id="metadataCard">
+                <img class="metadata-poster hidden" id="metadataPoster" alt="">
+                <div class="metadata-body">
+                  <div class="metadata-title-row">
+                    <div class="metadata-match-title" id="metadataMatchTitle"></div>
+                    <div class="metadata-score" id="metadataScore"></div>
+                  </div>
+                  <div class="metadata-meta" id="metadataMeta"></div>
+                  <div class="folder-tags metadata-sources hidden" id="metadataSources"></div>
+                  <div class="metadata-section hidden" id="metadataTagsSection">
+                    <div class="metadata-section-label">Tags</div>
+                    <div class="metadata-tag-list folder-tags" id="metadataTags"></div>
+                  </div>
+                  <div class="metadata-overview-wrap">
+                    <div class="metadata-overview" id="metadataOverview"></div>
+                    <button class="metadata-expand-btn hidden" id="metadataOverviewToggle" type="button">Read more</button>
+                  </div>
+                  <div class="metadata-section hidden" id="metadataCastSection">
+                    <div class="metadata-section-label">Actors and actresses</div>
+                    <div class="metadata-cast-list" id="metadataCastList"></div>
+                  </div>
+                  <details class="metadata-details hidden" id="metadataDetailsSection">
+                    <summary>More details</summary>
+                    <div class="metadata-details-body">
+                      <div class="metadata-section hidden" id="metadataUsefulSection">
+                        <div class="metadata-section-label">Useful information</div>
+                        <div class="metadata-useful-list" id="metadataUsefulList"></div>
+                      </div>
+                      <div class="metadata-note hidden" id="metadataNote"></div>
+                    </div>
+                  </details>
+                  <div class="metadata-candidates hidden" id="metadataCandidatesSection">
+                    <div class="metadata-candidates-title">Close matches</div>
+                    <div class="metadata-candidate-list" id="metadataCandidateList"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sprite-progress hidden" id="spriteProgress">
+              <span id="spriteLabel">Generating thumbnails...</span>
+              <div class="sp-bar"><div class="sp-bar-fill" id="spriteBarFill"></div></div>
+              <span id="spritePct">0%</span>
+            </div>
+          </section>
+        </section>
+
+        <section class="panel browser-section" id="browserSection">
+          <div class="browser-header" id="browserHeader" style="display:none">
+            <h2>Library</h2>
+            <span class="video-count" id="videoCount"></span>
+            <div class="video-search-wrap">
+              <input type="text" class="video-search" id="videoSearch" placeholder="Search videos, folders, or tags..." oninput="filterVideos()">
+            </div>
+            <div class="filter-strip-actions">
+              <button class="view-toggle-btn" id="viewToggleBtn" type="button">View: Recursive</button>
+              <button class="sort-btn" id="sortBtn" onclick="toggleSort()">Sort: Name ↑</button>
+            </div>
+          </div>
+
+          <div class="filter-strip hidden" id="filterStrip">
+            <div class="filter-strip-main">
+              <div class="filter-strip-label">Folder Filters</div>
+              <div class="folder-tags" id="activeTagFilters"></div>
+              <div class="filter-strip-empty" id="filterStripEmpty">No active folder filters</div>
+            </div>
+            <button class="clear-filters-btn hidden" id="clearFiltersBtn" type="button">Clear Filters</button>
+          </div>
+
+          <div class="browser-loading hidden" id="browserLoading">
+            <div class="spinner"></div>
+            <div>Scanning folder...</div>
+          </div>
+
+          <div class="movie-grid" id="movieGrid"></div>
+
+          <div class="empty-state" id="emptyState">
+          <div class="empty-icon">
+            <svg width="48" height="48" viewBox="0 0 256 256" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H216V88H40ZM40,200V104H216V200Z"/>
+              <rect x="60" y="124" width="20" height="20" rx="4"/>
+              <rect x="118" y="124" width="20" height="20" rx="4"/>
+              <rect x="176" y="124" width="20" height="20" rx="4"/>
+              <rect x="60" y="160" width="20" height="20" rx="4"/>
+              <rect x="118" y="160" width="20" height="20" rx="4"/>
+              <rect x="176" y="160" width="20" height="20" rx="4"/>
+              <rect x="60" y="60" width="20" height="20" rx="4"/>
+              <rect x="118" y="60" width="20" height="20" rx="4"/>
+              <rect x="176" y="60" width="20" height="20" rx="4"/>
+            </svg>
+          </div>
+            <div class="empty-title">Open a folder to get started</div>
+            <div class="empty-sub">Select a folder containing your video files to populate the library and activate poster and sprite generation.</div>
+          </div>
+        </section>
+      </div>
+    </div>
+</div>
+
+<div class="settings-modal hidden" id="settingsModal">
+  <div class="settings-backdrop" id="settingsBackdrop"></div>
+  <div class="settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settingsDialogTitle">
+    <div class="settings-dialog-head">
+      <div>
+        <div class="panel-title" id="settingsDialogTitle">Metadata Sources</div>
+        <div class="settings-dialog-subtitle">Store TMDb, OMDb, and optional Letterboxd fallback credentials in-app. Letterboxd search is attempted anonymously first.</div>
+      </div>
+      <button class="settings-close-btn" id="settingsCloseBtn" type="button">Close</button>
+    </div>
+    <div class="settings-form">
+      <label class="settings-field">
+        <span class="settings-field-label">TMDb API Key or Bearer Token</span>
+        <input class="settings-input" id="tmdbApiKeyInput" type="password" placeholder="Paste TMDb key or bearer token">
+        <span class="settings-field-note">Accepted formats: TMDb v3 API key or a TMDb v4 bearer token.</span>
+      </label>
+      <label class="settings-field">
+        <span class="settings-field-label">OMDb API Key</span>
+        <input class="settings-input" id="omdbApiKeyInput" type="password" placeholder="Paste OMDb API key">
+      </label>
+      <label class="settings-field">
+        <span class="settings-field-label">Letterboxd Client ID</span>
+        <input class="settings-input" id="letterboxdClientIdInput" type="password" placeholder="Paste Letterboxd client ID">
+        <span class="settings-field-note">Optional. Used only if anonymous Letterboxd requests stop working or richer detail endpoints require auth.</span>
+      </label>
+      <label class="settings-field">
+        <span class="settings-field-label">Letterboxd Client Secret</span>
+        <input class="settings-input" id="letterboxdClientSecretInput" type="password" placeholder="Paste Letterboxd client secret">
+      </label>
+      <div class="settings-status" id="settingsStatus">TVMaze is always available. Saved keys enable the other providers for matching.</div>
+      <div class="settings-actions">
+        <button class="theme-btn" id="settingsCancelBtn" type="button">Cancel</button>
+        <button class="open-btn" id="settingsSaveBtn" type="button">Save Sources</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="person-modal hidden" id="personModal">
+  <div class="settings-backdrop" id="personBackdrop"></div>
+  <div class="person-dialog" role="dialog" aria-modal="true" aria-labelledby="personName">
+    <div class="person-head">
+      <img class="person-poster" id="personPoster" alt="">
+      <div class="person-body">
+        <div class="person-name-row">
+          <div class="person-name" id="personName">Cast detail</div>
+          <button class="person-close-btn" id="personCloseBtn" type="button">Close</button>
+        </div>
+        <div class="person-subtitle" id="personSubtitle">Select a cast member from the metadata panel.</div>
+        <div class="person-meta" id="personMeta"></div>
+        <div class="person-links" id="personLinks"></div>
+        <div class="person-section">
+          <div class="person-section-title">Biography</div>
+          <div class="person-bio" id="personBio">No biography loaded yet.</div>
+        </div>
+        <div class="person-section">
+          <div class="person-section-title">Useful facts</div>
+          <div class="person-pill-list" id="personFacts"></div>
+        </div>
+        <div class="person-section">
+          <div class="person-section-title">Known for</div>
+          <div class="person-pill-list" id="personKnownFor"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const video = document.getElementById('video');
+const overlay = document.getElementById('statusOverlay');
+const statusText = document.getElementById('statusText');
+const spinnerEl = document.getElementById('spinner');
+const playerWrap = document.getElementById('playerWrap');
+const movieGrid = document.getElementById('movieGrid');
+const videoSearch = document.getElementById('videoSearch');
+const emptyState = document.getElementById('emptyState');
+const browserHeader = document.getElementById('browserHeader');
+const browserLoading = document.getElementById('browserLoading');
+const folderPathEl = document.getElementById('folderPath');
+const videoCountEl = document.getElementById('videoCount');
+const spriteProgress = document.getElementById('spriteProgress');
+const spriteBarFill = document.getElementById('spriteBarFill');
+const spritePct = document.getElementById('spritePct');
+const spriteLabel = document.getElementById('spriteLabel');
+const videoInfoEl = document.getElementById('videoInfo');
+const videoInfoName = document.getElementById('videoInfoName');
+const videoInfoMeta = document.getElementById('videoInfoMeta');
+const metadataPanel = document.getElementById('metadataPanel');
+const metadataStatus = document.getElementById('metadataStatus');
+const metadataCard = document.getElementById('metadataCard');
+const metadataPoster = document.getElementById('metadataPoster');
+const metadataMatchTitle = document.getElementById('metadataMatchTitle');
+const metadataScore = document.getElementById('metadataScore');
+const metadataMeta = document.getElementById('metadataMeta');
+const metadataSources = document.getElementById('metadataSources');
+const metadataTagsSection = document.getElementById('metadataTagsSection');
+const metadataTags = document.getElementById('metadataTags');
+const metadataOverviewToggle = document.getElementById('metadataOverviewToggle');
+const metadataDetailsSection = document.getElementById('metadataDetailsSection');
+const metadataUsefulSection = document.getElementById('metadataUsefulSection');
+const metadataUsefulList = document.getElementById('metadataUsefulList');
+const metadataCastSection = document.getElementById('metadataCastSection');
+const metadataCastList = document.getElementById('metadataCastList');
+const metadataOverview = document.getElementById('metadataOverview');
+const metadataNote = document.getElementById('metadataNote');
+const metadataRefreshBtn = document.getElementById('metadataRefreshBtn');
+const metadataProviderBadges = document.getElementById('metadataProviderBadges');
+const metadataCandidatesSection = document.getElementById('metadataCandidatesSection');
+const metadataCandidateList = document.getElementById('metadataCandidateList');
+const filterStrip = document.getElementById('filterStrip');
+const activeTagFiltersEl = document.getElementById('activeTagFilters');
+const filterStripEmpty = document.getElementById('filterStripEmpty');
+const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+const ffmpegWarn = document.getElementById('ffmpegWarn');
+const sortBtn = document.getElementById('sortBtn');
+const viewToggleBtn = document.getElementById('viewToggleBtn');
+const scrollArea = document.getElementById('scrollArea');
+const themeBtn = document.getElementById('themeBtn');
+const metadataSettingsBtn = document.getElementById('metadataSettingsBtn');
+const headerLibraryBadge = document.getElementById('headerLibraryBadge');
+const headerNowPlaying = document.getElementById('headerNowPlaying');
+const playerStatusChip = document.getElementById('playerStatusChip');
+const playerThemeChip = document.getElementById('playerThemeChip');
+const playerEmpty = document.getElementById('playerEmpty');
+const settingsModal = document.getElementById('settingsModal');
+const settingsBackdrop = document.getElementById('settingsBackdrop');
+const settingsCloseBtn = document.getElementById('settingsCloseBtn');
+const settingsCancelBtn = document.getElementById('settingsCancelBtn');
+const settingsSaveBtn = document.getElementById('settingsSaveBtn');
+const settingsStatus = document.getElementById('settingsStatus');
+const tmdbApiKeyInput = document.getElementById('tmdbApiKeyInput');
+const omdbApiKeyInput = document.getElementById('omdbApiKeyInput');
+const letterboxdClientIdInput = document.getElementById('letterboxdClientIdInput');
+const letterboxdClientSecretInput = document.getElementById('letterboxdClientSecretInput');
+const personModal = document.getElementById('personModal');
+const personBackdrop = document.getElementById('personBackdrop');
+const personCloseBtn = document.getElementById('personCloseBtn');
+const personPoster = document.getElementById('personPoster');
+const personName = document.getElementById('personName');
+const personSubtitle = document.getElementById('personSubtitle');
+const personMeta = document.getElementById('personMeta');
+const personLinks = document.getElementById('personLinks');
+const personBio = document.getElementById('personBio');
+const personFacts = document.getElementById('personFacts');
+const personKnownFor = document.getElementById('personKnownFor');
+
+let player = null;
+let currentHls = null;
+let currentFolder = null;
+let allVideos = [];
+let filteredVideos = [];
+let currentVideo = null;
+let hasFfmpeg = true;
+let sortField = 'name';
+let sortAsc = true;
+let posterQueue = [];
+let posterRunning = false;
+let currentTheme = 'dark';
+let activeTagFilters = [];
+let viewMode = 'recursive';
+let metadataSourceStatus = [];
+let metadataLookupToken = 0;
+let metadataSettings = { tmdbApiKey: '', omdbApiKey: '', letterboxdClientId: '', letterboxdClientSecret: '' };
+let currentMetadataResult = null;
+let currentPersonLookupToken = 0;
+
+// ── Init ──
+(async function init() {
+  initTheme();
+  initViewMode();
+  initPlayer();
+  hasFfmpeg = await api.checkFfmpeg();
+  metadataSettings = await api.getMetadataSettings();
+  metadataSourceStatus = await api.getMetadataSourceStatus();
+  initMetadataPanel();
+  initSettingsPanel();
+  initPersonModal();
+  if (!hasFfmpeg) ffmpegWarn.classList.add('visible');
+
+  api.onSpriteProgress((data) => {
+    if (currentVideo && data.videoPath === currentVideo.path) {
+      if (data.status === 'generating') {
+        spriteProgress.classList.remove('hidden');
+        spriteBarFill.style.width = data.percent + '%';
+        spritePct.textContent = data.percent + '%';
+        spriteLabel.textContent = 'Generating thumbnails...';
+      } else if (data.status === 'done') {
+        spriteBarFill.style.width = '100%';
+        spritePct.textContent = '100%';
+        spriteLabel.textContent = 'Thumbnails ready';
+        setTimeout(() => spriteProgress.classList.add('hidden'), 2000);
+      } else if (data.status === 'error') {
+        spriteLabel.textContent = 'Thumbnail generation failed';
+        setTimeout(() => spriteProgress.classList.add('hidden'), 3000);
+      }
+    }
+  });
+
+  const lastFolder = await api.getLastFolder();
+  if (lastFolder) loadFolder(lastFolder);
+})();
+
+function initTheme() {
+  const savedTheme = localStorage.getItem('local-player-theme');
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    currentTheme = savedTheme;
+  }
+  applyTheme(currentTheme);
+  themeBtn.addEventListener('click', toggleTheme);
+}
+
+function initViewMode() {
+  const savedMode = localStorage.getItem('local-player-view-mode');
+  if (savedMode === 'top-level' || savedMode === 'recursive') {
+    viewMode = savedMode;
+  }
+  updateViewModeButton();
+  viewToggleBtn.addEventListener('click', toggleViewMode);
+  clearFiltersBtn.addEventListener('click', clearTagFilters);
+}
+
+function initMetadataPanel() {
+  metadataRefreshBtn.addEventListener('click', () => {
+    if (currentVideo) loadMetadataForVideo(currentVideo, true);
+  });
+  metadataOverviewToggle.addEventListener('click', toggleMetadataOverview);
+  renderMetadataProviderBadges(metadataSourceStatus);
+  renderMetadataIdle();
+}
+
+function initSettingsPanel() {
+  metadataSettingsBtn.addEventListener('click', openSettingsModal);
+  settingsBackdrop.addEventListener('click', closeSettingsModal);
+  settingsCloseBtn.addEventListener('click', closeSettingsModal);
+  settingsCancelBtn.addEventListener('click', closeSettingsModal);
+  settingsSaveBtn.addEventListener('click', saveMetadataSettings);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !settingsModal.classList.contains('hidden')) {
+      closeSettingsModal();
+    }
+  });
+  syncSettingsInputs();
+}
+
+function initPersonModal() {
+  personBackdrop.addEventListener('click', closePersonModal);
+  personCloseBtn.addEventListener('click', closePersonModal);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !personModal.classList.contains('hidden')) {
+      closePersonModal();
+    }
+  });
+}
+
+function syncSettingsInputs() {
+  tmdbApiKeyInput.value = metadataSettings.tmdbApiKey || '';
+  omdbApiKeyInput.value = metadataSettings.omdbApiKey || '';
+  letterboxdClientIdInput.value = metadataSettings.letterboxdClientId || '';
+  letterboxdClientSecretInput.value = metadataSettings.letterboxdClientSecret || '';
+}
+
+function openSettingsModal() {
+  syncSettingsInputs();
+  settingsStatus.textContent = `Current sources: ${formatSourceStatus(metadataSourceStatus)}.`;
+  settingsModal.classList.remove('hidden');
+  tmdbApiKeyInput.focus();
+  tmdbApiKeyInput.select();
+}
+
+function closeSettingsModal() {
+  settingsModal.classList.add('hidden');
+}
+
+async function saveMetadataSettings() {
+  settingsSaveBtn.disabled = true;
+  settingsStatus.textContent = 'Saving metadata provider settings...';
+
+  try {
+    const result = await api.saveMetadataSettings({
+      tmdbApiKey: tmdbApiKeyInput.value,
+      omdbApiKey: omdbApiKeyInput.value,
+      letterboxdClientId: letterboxdClientIdInput.value,
+      letterboxdClientSecret: letterboxdClientSecretInput.value,
+    });
+    metadataSettings = result.settings || {
+      tmdbApiKey: tmdbApiKeyInput.value.trim(),
+      omdbApiKey: omdbApiKeyInput.value.trim(),
+      letterboxdClientId: letterboxdClientIdInput.value.trim(),
+      letterboxdClientSecret: letterboxdClientSecretInput.value.trim(),
+    };
+    metadataSourceStatus = result.sourceStatus || metadataSourceStatus;
+    renderMetadataProviderBadges(metadataSourceStatus);
+    settingsStatus.textContent = `Saved. Active sources: ${formatSourceStatus(metadataSourceStatus)}.`;
+    closeSettingsModal();
+    if (currentVideo) {
+      loadMetadataForVideo(currentVideo, true);
+    } else {
+      renderMetadataIdle();
+    }
+  } catch (error) {
+    settingsStatus.textContent = `Failed to save metadata settings. ${error?.message || 'Unknown error'}`;
+  } finally {
+    settingsSaveBtn.disabled = false;
+  }
+}
+
+function applyTheme(theme) {
+  currentTheme = theme;
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('local-player-theme', theme);
+  playerThemeChip.textContent = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
+}
+
+function toggleTheme() {
+  applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+}
+
+function updateViewModeButton() {
+  viewToggleBtn.textContent = viewMode === 'recursive' ? 'View: Recursive' : 'View: Top Level';
+}
+
+function toggleViewMode() {
+  viewMode = viewMode === 'recursive' ? 'top-level' : 'recursive';
+  localStorage.setItem('local-player-view-mode', viewMode);
+  updateViewModeButton();
+  filterVideos();
+}
+
+function initPlayer() {
+  player = new Plyr(video, {
+    controls: [
+      'play-large', 'rewind', 'play', 'fast-forward', 'progress',
+      'current-time', 'duration', 'mute', 'volume',
+      'settings', 'pip', 'fullscreen'
+    ],
+    settings: ['quality', 'speed'],
+    speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2, 4] },
+    keyboard: { focused: true, global: true },
+    tooltips: { controls: true, seek: true },
+    seekTime: 5,
+    previewThumbnails: { enabled: false },
+    ratio: '16:9'
+  });
+}
+
+// ── Folder ──
+async function openFolder() {
+  const folder = await api.selectFolder();
+  if (folder) loadFolder(folder);
+}
+
+async function loadFolder(folderPath) {
+  currentFolder = folderPath;
+  activeTagFilters = [];
+  folderPathEl.textContent = folderPath;
+  browserHeader.style.display = '';
+  filterStrip.classList.remove('hidden');
+  emptyState.classList.add('hidden');
+  browserLoading.classList.remove('hidden');
+  movieGrid.innerHTML = '';
+
+  try {
+    allVideos = await api.listVideos(folderPath);
+    sortVideos();
+    filterVideos();
+    browserLoading.classList.add('hidden');
+
+    if (allVideos.length === 0) {
+      emptyState.classList.remove('hidden');
+      emptyState.querySelector('.empty-title').textContent = 'No videos found';
+      emptyState.querySelector('.empty-sub').textContent = 'This folder has no supported video files';
+      browserHeader.style.display = 'none';
+    }
+
+    if (hasFfmpeg) generatePostersQueue();
+  } catch (err) {
+    browserLoading.classList.add('hidden');
+    emptyState.classList.remove('hidden');
+    emptyState.querySelector('.empty-title').textContent = 'Error reading folder';
+    emptyState.querySelector('.empty-sub').textContent = err.message || 'Unknown error';
+  }
+}
+
+// ── Sort ──
+function sortVideos() {
+  allVideos.sort((a, b) => {
+    let cmp;
+    if (sortField === 'name') cmp = a.name.localeCompare(b.name);
+    else if (sortField === 'size') cmp = a.size - b.size;
+    else if (sortField === 'date') cmp = new Date(a.modified) - new Date(b.modified);
+    else cmp = 0;
+    return sortAsc ? cmp : -cmp;
+  });
+}
+
+function toggleSort() {
+  const fields = ['name', 'size', 'date'];
+  const idx = fields.indexOf(sortField);
+  if (sortAsc) {
+    sortAsc = false;
+  } else {
+    sortAsc = true;
+    const nextIdx = (idx + 1) % fields.length;
+    sortField = fields[nextIdx];
+  }
+  const labels = { name: 'Name', size: 'Size', date: 'Date' };
+  sortBtn.textContent = `Sort: ${labels[sortField]} ${sortAsc ? '↑' : '↓'}`;
+  sortVideos();
+  filterVideos();
+}
+
+// ── Filter ──
+function filterVideos() {
+  const q = videoSearch.value.trim().toLowerCase();
+  filteredVideos = allVideos.filter((videoItem) => {
+    if (viewMode === 'top-level' && videoItem.relativeDir) return false;
+
+    const tagNames = (videoItem.folderTags || []).map((value) => value.toLowerCase());
+    if (activeTagFilters.length && !activeTagFilters.every((tag) => tagNames.includes(tag.toLowerCase()))) {
+      return false;
+    }
+
+    if (!q) return true;
+
+    const haystacks = [
+      videoItem.name,
+      getVideoDisplayTitle(videoItem),
+      videoItem.relativeDir,
+      videoItem.relativePath,
+      ...(videoItem.folderTags || []),
+    ]
+      .filter(Boolean)
+      .map((value) => value.toLowerCase());
+
+    return haystacks.some((value) => value.includes(q));
+  });
+  videoCountEl.textContent = `${filteredVideos.length} of ${allVideos.length} videos`;
+  headerLibraryBadge.textContent = `${filteredVideos.length} Videos`;
+  renderActiveTagFilters();
+  if (currentVideo) showVideoInfo(currentVideo);
+  renderGrid();
+}
+
+// ── Poster generation queue ──
+function generatePostersQueue() {
+  posterQueue = allVideos.filter(v => !v.hasPoster).map(v => v.path);
+  if (!posterRunning && posterQueue.length > 0) runPosterQueue();
+}
+
+async function runPosterQueue() {
+  posterRunning = true;
+  while (posterQueue.length > 0) {
+    const videoPath = posterQueue.shift();
+    const video = allVideos.find(v => v.path === videoPath);
+    if (!video || video.posterUrl) continue;
+    try {
+      const posterUrl = await api.generatePoster(videoPath);
+      if (posterUrl && video) {
+        video.hasPoster = true;
+        video.localPosterUrl = posterUrl;
+        video.posterUrl = posterUrl;
+        if (!video.metadataMatch?.posterUrl) {
+          const idx = allVideos.indexOf(video);
+          const img = document.querySelector(`[data-idx="${idx}"] .thumb`);
+          if (img && img.tagName === 'IMG') img.src = posterUrl;
+        }
+      }
+    } catch {}
+  }
+  posterRunning = false;
+}
+
+// ── Grid render ──
+function renderGrid() {
+  movieGrid.innerHTML = '';
+
+  if (filteredVideos.length === 0 && allVideos.length > 0) {
+    movieGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-dim)">No videos match your search</div>';
+    return;
+  }
+
+  filteredVideos.forEach(v => {
+    const idx = allVideos.indexOf(v);
+    const card = document.createElement('div');
+    card.className = 'movie-card' + (currentVideo && currentVideo.path === v.path ? ' active' : '');
+    card.dataset.idx = idx;
+    card.onclick = () => playVideo(v);
+
+    const posterSrc = getVideoPosterUrl(v);
+    const folderTagsMarkup = buildFolderTagsMarkup(v.folderTags || []);
+    card.innerHTML = `
+      <div class="thumb-wrap">
+        ${posterSrc
+          ? `<img class="thumb" src="${posterSrc}" loading="lazy" alt="">`
+          : `<div class="thumb fallback"><svg width="32" height="32" viewBox="0 0 256 256" fill="currentColor"><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H216V88H40ZM40,200V104H216V200Z"/><rect x="60" y="124" width="20" height="20" rx="4"/><rect x="118" y="124" width="20" height="20" rx="4"/><rect x="176" y="124" width="20" height="20" rx="4"/><rect x="60" y="160" width="20" height="20" rx="4"/><rect x="118" y="160" width="20" height="20" rx="4"/><rect x="176" y="160" width="20" height="20" rx="4"/></svg></div>`
+        }
+      </div>
+      <div class="card-below">
+        <div class="card-title">${escapeHtml(getVideoDisplayTitle(v))}</div>
+        ${v.metadataMatch?.year ? `<div class="card-year">${escapeHtml(String(v.metadataMatch.year))}</div>` : ''}
+        ${folderTagsMarkup}
+      </div>
+    `;
+    card.querySelectorAll('[data-filter-tag]').forEach((tagButton) => {
+      tagButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleTagFilter(tagButton.dataset.filterTag);
+      });
+    });
+    movieGrid.appendChild(card);
+  });
+}
+
+// ── Playback ──
+let videoErrorHandler = null;
+let loadTimeout = null;
+
+async function playVideo(v) {
+  currentVideo = v;
+  scrollArea.scrollTo({ top: 0, behavior: 'smooth' });
+
+  playerEmpty.classList.add('hidden');
+  playerWrap.classList.remove('hidden');
+  showOverlay('Loading video...');
+  spriteProgress.classList.add('hidden');
+  playerStatusChip.textContent = 'Loading';
+  const currentDisplayTitle = getVideoDisplayTitle(v);
+  headerNowPlaying.textContent = currentDisplayTitle.length > 28 ? currentDisplayTitle.slice(0, 28) + '...' : currentDisplayTitle;
+
+  // Clean up previous playback
+  if (loadTimeout) { clearTimeout(loadTimeout); loadTimeout = null; }
+  if (videoErrorHandler) { video.removeEventListener('error', videoErrorHandler); videoErrorHandler = null; }
+  if (currentHls) { currentHls.destroy(); currentHls = null; }
+  video.pause();
+  video.removeAttribute('src');
+  video.load();
+
+  // Reset sprite state for the new video
+  if (player && player.previewThumbnails) {
+    const pt = player.previewThumbnails;
+    if (pt.loaded && pt.listeners) {
+      try {
+        player.off('play', pt.listeners.play);
+        player.off('seeked', pt.listeners.seeked);
+        player.off('timeupdate', pt.listeners.timeupdate);
+      } catch {}
+    }
+    pt.loaded = false;
+    pt.thumbnails = [];
+    pt.loadedImages = [];
+  }
+  player.config.previewThumbnails.enabled = false;
+
+  // Update active state in grid
+  document.querySelectorAll('.movie-card').forEach(c => c.classList.remove('active'));
+  const idx = allVideos.indexOf(v);
+  const activeCard = document.querySelector(`[data-idx="${idx}"]`);
+  if (activeCard) activeCard.classList.add('active');
+
+  // Show video info
+  showVideoInfo(v);
+  loadMetadataForVideo(v);
+
+  const mediaUrl = await api.getMediaUrl(v.path);
+  const ext = v.name.split('.').pop().toLowerCase();
+
+  // Persistent error handler (survives across seeks, not just initial load)
+  videoErrorHandler = () => {
+    if (loadTimeout) { clearTimeout(loadTimeout); loadTimeout = null; }
+    if (video.error) {
+      const code = video.error.code;
+      const msg = video.error.message || '';
+      let detail = ext;
+      if (msg.includes('DEMUXER_ERROR_COULD_NOT_OPEN')) {
+        detail = 'container format not recognized — file may not be a valid ' + ext.toUpperCase();
+      } else if (msg.includes('PIPELINE_ERROR_READ')) {
+        detail = 'data read error — file may be corrupted or have an unsupported structure';
+      } else if (code === 3) {
+        detail = 'decode error — codec may not be supported';
+      } else if (code === 2) {
+        detail = 'network/loading error';
+      }
+      playerStatusChip.textContent = 'Error';
+      showError('Playback error – ' + detail);
+    }
+  };
+  video.addEventListener('error', videoErrorHandler);
+
+  // Loading timeout — if metadata doesn't arrive within 15s, show error
+  loadTimeout = setTimeout(() => {
+    if (video.readyState < 1) { // HAVE_NOTHING or HAVE_METADATA not reached
+      playerStatusChip.textContent = 'Timeout';
+      showError('Loading timeout – file may have an unsupported structure or be too large to open quickly');
+    }
+  }, 15000);
+
+  if (ext === 'm3u8') {
+    // HLS
+    if (Hls.isSupported()) {
+      currentHls = new Hls({ maxBufferLength: 60, maxMaxBufferLength: 120 });
+      currentHls.loadSource(mediaUrl);
+      currentHls.attachMedia(video);
+      currentHls.on(Hls.Events.MANIFEST_PARSED, () => {
+        if (loadTimeout) { clearTimeout(loadTimeout); loadTimeout = null; }
+        playerStatusChip.textContent = 'Playing';
+        hideOverlay();
+        video.play().catch(() => {});
+      });
+      currentHls.on(Hls.Events.ERROR, (_, data) => {
+        if (data.fatal) {
+          playerStatusChip.textContent = 'HLS Error';
+          showError('HLS error: ' + data.details);
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = mediaUrl;
+      video.addEventListener('loadedmetadata', () => {
+        if (loadTimeout) { clearTimeout(loadTimeout); loadTimeout = null; }
+        playerStatusChip.textContent = 'Playing';
+        hideOverlay();
+        video.play().catch(() => {});
+      }, { once: true });
+    } else {
+      playerStatusChip.textContent = 'Unsupported';
+      showError('HLS playback not supported');
+      return;
+    }
+  } else {
+    // Direct playback
+    video.src = mediaUrl;
+    video.addEventListener('loadedmetadata', () => {
+      if (loadTimeout) { clearTimeout(loadTimeout); loadTimeout = null; }
+      playerStatusChip.textContent = 'Playing';
+      hideOverlay();
+      video.play().catch(() => {});
+    }, { once: true });
+  }
+
+  // Load or generate sprites
+  if (hasFfmpeg) {
+    generateSpritesForVideo(v);
+  }
+
+  // Get duration for info
+  if (hasFfmpeg) {
+    const dur = await api.getDuration(v.path);
+    if (dur > 0) {
+      const durEl = document.getElementById('infoDuration');
+      if (durEl) durEl.textContent = fmtDuration(dur);
+    }
+  }
+}
+
+async function generateSpritesForVideo(v) {
+  const result = await api.generateSprites(v.path);
+  if (result && result.vttUrl && currentVideo === v) {
+    v.hasSprites = true;
+    loadSpritesIntoPlayer(result.vttUrl);
+  }
+}
+
+function loadSpritesIntoPlayer(vttUrl) {
+  if (!player) return;
+
+  // Enable preview thumbnails and set src
+  player.config.previewThumbnails.enabled = true;
+  player.config.previewThumbnails.src = vttUrl;
+
+  // If previewThumbnails plugin wasn't instantiated yet, create it
+  if (!player.previewThumbnails) {
+    try {
+      // Plyr checks config.previewThumbnails.enabled in its PreviewThumbnails constructor
+      player.previewThumbnails = new window.Plyr.PreviewThumbnails
+        ? new window.Plyr.PreviewThumbnails(player)
+        : null;
+    } catch {}
+    return; // constructor calls load() internally
+  }
+
+  // Reset previous state
+  const pt = player.previewThumbnails;
+  if (pt.loaded && pt.listeners) {
+    try {
+      player.off('play', pt.listeners.play);
+      player.off('seeked', pt.listeners.seeked);
+      player.off('timeupdate', pt.listeners.timeupdate);
+    } catch {}
+  }
+  pt.loaded = false;
+  pt.thumbnails = [];
+  pt.loadedImages = [];
+
+  // Reload with new VTT
+  try { pt.load(); } catch {}
+}
+
+// ── Video Info ──
+function showVideoInfo(v) {
+  videoInfoName.textContent = getVideoDisplayTitle(v);
+  videoInfoMeta.innerHTML = `
+    ${buildBreadcrumbsMarkup(v.folderTags || [])}
+    <span>📦 ${fmtSize(v.size)}</span>
+    <span>📅 ${new Date(v.modified).toLocaleDateString()}</span>
+    <span>📁 ${escapeHtml(v.relativeDir || 'Root folder')}</span>
+    <span id="infoDuration">⏱ ...</span>
+  `;
+  videoInfoMeta.querySelectorAll('[data-filter-tag]').forEach((tagButton) => {
+    tagButton.addEventListener('click', () => {
+      toggleTagFilter(tagButton.dataset.filterTag);
+      scrollArea.scrollTo({ top: document.getElementById('browserSection').offsetTop - 18, behavior: 'smooth' });
+    });
+  });
+  videoInfoEl.classList.add('visible');
+}
+
+async function loadMetadataForVideo(v, forceRefresh = false) {
+  const lookupToken = ++metadataLookupToken;
+  currentMetadataResult = null;
+  renderMetadataLoading(v);
+
+  try {
+    const result = await api.lookupMetadata({
+      filename: v.name,
+      videoPath: v.path,
+      forceRefresh,
+    });
+
+    if (lookupToken !== metadataLookupToken || currentVideo?.path !== v.path) {
+      return;
+    }
+
+    metadataSourceStatus = result.sourceStatus || metadataSourceStatus;
+    currentMetadataResult = result;
+    renderMetadataResult(v, result);
+  } catch (error) {
+    if (lookupToken !== metadataLookupToken || currentVideo?.path !== v.path) {
+      return;
+    }
+    currentMetadataResult = null;
+    renderMetadataError(error);
+  }
+}
+
+function renderMetadataIdle() {
+  metadataPanel.classList.remove('has-result');
+  metadataCard.classList.add('hidden');
+  metadataCandidatesSection.classList.add('hidden');
+  metadataDetailsSection.classList.add('hidden');
+  metadataDetailsSection.open = false;
+  metadataOverviewToggle.classList.add('hidden');
+  renderMetadataProviderBadges(metadataSourceStatus);
+  metadataStatus.textContent = `Select a video to match metadata. Sources: ${formatSourceStatus(metadataSourceStatus)}.`;
+}
+
+function renderMetadataLoading(v) {
+  metadataPanel.classList.remove('has-result');
+  metadataCard.classList.add('hidden');
+  metadataCandidatesSection.classList.add('hidden');
+  metadataDetailsSection.classList.add('hidden');
+  metadataDetailsSection.open = false;
+  metadataOverviewToggle.classList.add('hidden');
+  renderMetadataProviderBadges(metadataSourceStatus);
+  metadataStatus.textContent = `Matching metadata for ${v.name} using ${formatSourceStatus(metadataSourceStatus)}...`;
+}
+
+function renderMetadataResult(videoItem, result) {
+  const parsed = result.parsed || { query: videoItem.name, year: null };
+  const bestMatch = result.selectedMatch || result.bestMatch;
+  renderMetadataProviderBadges(result.sourceStatus || metadataSourceStatus);
+
+  if (!bestMatch) {
+    metadataPanel.classList.remove('has-result');
+    metadataCard.classList.add('hidden');
+    metadataCandidatesSection.classList.add('hidden');
+    metadataDetailsSection.classList.add('hidden');
+    metadataDetailsSection.open = false;
+    metadataStatus.textContent = `No confident metadata match for \"${parsed.query}\". Sources checked: ${formatSourceStatus(result.sourceStatus)}.`;
+    applyResolvedMovieMatch(videoItem, null);
+    return;
+  }
+
+  metadataPanel.classList.add('has-result');
+  metadataStatus.textContent = `Best match from ${bestMatch.sources.join(', ')} for parsed title \"${parsed.query}\".`;
+  metadataCard.classList.remove('hidden');
+  applyResolvedMovieMatch(videoItem, bestMatch);
+
+  if (bestMatch.posterUrl) {
+    metadataPoster.src = bestMatch.posterUrl;
+    metadataPoster.classList.remove('hidden');
+  } else {
+    metadataPoster.removeAttribute('src');
+    metadataPoster.classList.add('hidden');
+  }
+
+  metadataMatchTitle.textContent = bestMatch.title;
+  metadataScore.textContent = `Score ${bestMatch.score}`;
+  metadataMeta.innerHTML = buildMetadataMeta(bestMatch, parsed);
+  metadataSources.innerHTML = bestMatch.sources.map((source, index) => `
+    <span class="folder-tag level-${Math.min(index, 4)}">${escapeHtml(source)}</span>
+  `).join('');
+  metadataSources.classList.toggle('hidden', bestMatch.sources.length <= 1);
+  renderMetadataTags(bestMatch, videoItem);
+  metadataOverview.textContent = bestMatch.overview || 'No overview returned from the matched services.';
+  updateMetadataOverviewState();
+  metadataNote.innerHTML = buildMetadataNote(result.sourceStatus, parsed, bestMatch);
+  metadataNote.classList.remove('hidden');
+  renderMetadataUsefulInfo(bestMatch);
+  renderMetadataCast(bestMatch.cast || []);
+  renderMetadataCandidates(videoItem, result, bestMatch);
+}
+
+function renderMetadataError(error) {
+  metadataPanel.classList.remove('has-result');
+  metadataCard.classList.add('hidden');
+  metadataCandidatesSection.classList.add('hidden');
+  metadataDetailsSection.classList.add('hidden');
+  metadataDetailsSection.open = false;
+  metadataStatus.textContent = `Metadata lookup failed. ${error?.message || 'Unknown error'}`;
+}
+
+function renderMetadataProviderBadges(sourceStatus) {
+  metadataProviderBadges.innerHTML = (sourceStatus || []).map((source) => {
+    const label = source.name === 'TVMaze'
+      ? 'TVMaze public'
+      : source.available
+        ? `${source.name} active`
+        : `${source.name} inactive`;
+    const classes = ['metadata-provider-badge', source.available ? 'active' : '', source.name.toLowerCase()].filter(Boolean).join(' ');
+    return `<span class="${classes}" title="${escapeHtml(source.reason || '')}">${escapeHtml(label)}</span>`;
+  }).join('');
+}
+
+function renderMetadataCandidates(videoItem, result, activeMatch) {
+  const closeCandidates = getCloseCandidates(result.candidates || []);
+  if (closeCandidates.length <= 1) {
+    metadataCandidatesSection.classList.add('hidden');
+    metadataCandidateList.innerHTML = '';
+    return;
+  }
+
+  metadataCandidatesSection.classList.remove('hidden');
+  metadataCandidateList.innerHTML = closeCandidates.map((candidate, index) => `
+    <button class="metadata-candidate-btn${isSameCandidate(candidate, activeMatch) ? ' active' : ''}" type="button" data-candidate-index="${index}">
+      <span class="metadata-candidate-name">${escapeHtml(candidate.title)}</span>
+      <span class="metadata-candidate-meta">${escapeHtml(buildCandidateMeta(candidate))}</span>
+    </button>
+  `).join('');
+
+  metadataCandidateList.querySelectorAll('[data-candidate-index]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const candidate = closeCandidates[Number(button.dataset.candidateIndex)];
+      await selectMetadataCandidate(videoItem, candidate);
+    });
+  });
+}
+
+async function selectMetadataCandidate(videoItem, candidate) {
+  if (!videoItem || !candidate) return;
+  metadataStatus.textContent = `Saving ${candidate.title} as the selected metadata match...`;
+  try {
+    const response = await api.saveSelectedMetadata({
+      videoPath: videoItem.path,
+      filename: videoItem.name,
+      match: candidate,
+    });
+    metadataSourceStatus = response.sourceStatus || metadataSourceStatus;
+    const savedMatch = response.savedMatch || candidate;
+    currentMetadataResult = {
+      ...(currentMetadataResult || {}),
+      selectedMatch: savedMatch,
+      sourceStatus: metadataSourceStatus,
+    };
+    renderMetadataResult(videoItem, currentMetadataResult);
+  } catch (error) {
+    metadataStatus.textContent = `Failed to save metadata choice. ${error?.message || 'Unknown error'}`;
+  }
+}
+
+function getCloseCandidates(candidates) {
+  if (!Array.isArray(candidates) || candidates.length <= 1) return candidates || [];
+  const topScore = candidates[0]?.score || 0;
+  return candidates.filter((candidate) => Math.abs(topScore - (candidate.score || 0)) <= 10).slice(0, 5);
+}
+
+function buildCandidateMeta(candidate) {
+  const parts = [];
+  parts.push(candidate.type === 'series' ? 'Series' : 'Movie');
+  if (candidate.year) parts.push(String(candidate.year));
+  if (candidate.sources?.length) parts.push(candidate.sources.join(', '));
+  if (candidate.score) parts.push(`Score ${candidate.score}`);
+  return parts.join(' • ');
+}
+
+function isSameCandidate(left, right) {
+  if (!left || !right) return false;
+  if (left.source && right.source && left.source === right.source && left.sourceId && right.sourceId) {
+    return String(left.sourceId) === String(right.sourceId);
+  }
+  return left.title === right.title && left.year === right.year && left.type === right.type;
+}
+
+function applyResolvedMovieMatch(videoItem, match) {
+  const normalizedMatch = match && match.type === 'movie' ? { ...match } : null;
+  const previousTitle = getVideoDisplayTitle(videoItem);
+  const previousPoster = getVideoPosterUrl(videoItem);
+  videoItem.metadataMatch = normalizedMatch;
+  const nextTitle = getVideoDisplayTitle(videoItem);
+  const nextPoster = getVideoPosterUrl(videoItem);
+
+  if (currentVideo?.path === videoItem.path) {
+    headerNowPlaying.textContent = nextTitle.length > 28 ? nextTitle.slice(0, 28) + '...' : nextTitle;
+    showVideoInfo(videoItem);
+  }
+
+  if (previousTitle !== nextTitle || previousPoster !== nextPoster) {
+    renderGrid();
+  }
+}
+
+function getVideoDisplayTitle(videoItem) {
+  return videoItem?.metadataMatch?.type === 'movie' && videoItem.metadataMatch.title
+    ? videoItem.metadataMatch.title
+    : videoItem?.name || '';
+}
+
+function getVideoPosterUrl(videoItem) {
+  return videoItem?.metadataMatch?.type === 'movie' && videoItem.metadataMatch.posterUrl
+    ? videoItem.metadataMatch.posterUrl
+    : videoItem?.localPosterUrl || videoItem?.posterUrl || '';
+}
+
+function buildMetadataMeta(bestMatch, parsed) {
+  const meta = [];
+  meta.push(`<span>${bestMatch.type === 'series' ? 'Series' : 'Movie'}</span>`);
+  if (bestMatch.year) meta.push(`<span>${bestMatch.year}</span>`);
+  if (bestMatch.runtime) meta.push(`<span>${escapeHtml(String(bestMatch.runtime))}</span>`);
+  if (bestMatch.genre) meta.push(`<span>${escapeHtml(bestMatch.genre.split(',').slice(0, 2).join(', '))}</span>`);
+  if (bestMatch.rating) meta.push(`<span>Rating ${escapeHtml(String(bestMatch.rating))}</span>`);
+  if (bestMatch.contentRating) meta.push(`<span>${escapeHtml(bestMatch.contentRating)}</span>`);
+  if (bestMatch.language) meta.push(`<span>${escapeHtml(bestMatch.language)}</span>`);
+  if (parsed.year && !bestMatch.year) meta.push(`<span>Filename year ${parsed.year}</span>`);
+  return meta.slice(0, 6).join('');
+}
+
+function buildMetadataNote(sourceStatus, parsed, bestMatch) {
+  if (bestMatch.externalUrl) {
+    return `<a href="javascript:void(0)" onclick="require('electron').shell.openExternal('${bestMatch.externalUrl}')" style="color:var(--text-dim); text-decoration:underline; word-break: break-all; font-size:12px; display:block; margin-top:16px;">Reference: ${bestMatch.externalUrl}</a>`;
+  }
+  return '';
+}
+
+function renderMetadataTags(bestMatch, videoItem) {
+  const tags = uniqueValues([
+    bestMatch.tags || [],
+    bestMatch.categories || [],
+    bestMatch.type === 'series' ? 'Series' : 'Movie',
+    bestMatch.year ? String(bestMatch.year) : null,
+  ]).slice(0, 5);
+
+  metadataTagsSection.classList.toggle('hidden', tags.length === 0);
+  metadataTags.innerHTML = tags.map((tag, index) => `
+    <span class="folder-tag level-${Math.min(index, 4)}">${escapeHtml(tag)}</span>
+  `).join('');
+}
+
+function renderMetadataUsefulInfo(bestMatch) {
+  let usefulInfo = uniqueValues([
+    bestMatch.usefulInfo || [],
+    bestMatch.releaseDate ? `Release Date: ${bestMatch.releaseDate}` : null,
+    bestMatch.country ? `Country: ${bestMatch.country}` : null,
+    bestMatch.language ? `Language: ${bestMatch.language}` : null,
+    bestMatch.studio ? `Studio: ${bestMatch.studio}` : null,
+    bestMatch.awards ? `Awards: ${bestMatch.awards}` : null,
+    bestMatch.seasonCount ? `Seasons: ${bestMatch.seasonCount}` : null,
+    bestMatch.episodeCount ? `Episodes: ${bestMatch.episodeCount}` : null,
+    bestMatch.tagline ? `Tagline: ${bestMatch.tagline}` : null,
+  ]).slice(0, 10);
+
+  // Filter out redundant items cached from older matching algorithms
+  usefulInfo = usefulInfo.filter(item => {
+    const lower = String(item).toLowerCase();
+    if (lower.startsWith('release:')) return false; 
+    if (lower.startsWith('released:')) return false;
+    if (lower.startsWith('premiered:')) return false;
+    if (lower === 'status: released' || lower === 'status: running') return false;
+    return true;
+  });
+
+  metadataUsefulSection.classList.toggle('hidden', usefulInfo.length === 0);
+  metadataUsefulList.innerHTML = usefulInfo.map((item) => `
+    <div class="metadata-useful-item">${formatUsefulInfo(item)}</div>
+  `).join('');
+  const hasDetails = usefulInfo.length > 0 || Boolean(metadataNote.innerHTML?.trim());
+  metadataDetailsSection.classList.toggle('hidden', !hasDetails);
+  if (!hasDetails) metadataDetailsSection.open = false;
+}
+
+function renderMetadataCast(cast) {
+  const visibleCast = Array.isArray(cast) ? cast.slice(0, 6) : [];
+  metadataCastSection.classList.toggle('hidden', visibleCast.length === 0);
+  metadataCastList.innerHTML = visibleCast.map((person, index) => `
+    <button class="metadata-cast-chip" type="button" data-cast-index="${index}">
+      <span>${escapeHtml(person.name)}</span>
+      <span class="metadata-cast-role">${escapeHtml(person.role || 'Cast')}</span>
+    </button>
+  `).join('');
+
+  metadataCastList.querySelectorAll('[data-cast-index]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const person = visibleCast[Number(button.dataset.castIndex)];
+      if (person) openPersonModal(person);
+    });
+  });
+}
+
+function toggleMetadataOverview() {
+  const isCollapsed = metadataOverview.classList.contains('collapsed');
+  metadataOverview.classList.toggle('collapsed', !isCollapsed);
+  metadataOverviewToggle.textContent = isCollapsed ? 'Show less' : 'Read more';
+}
+
+function updateMetadataOverviewState() {
+  metadataOverview.classList.remove('collapsed');
+  metadataOverviewToggle.classList.add('hidden');
+  metadataOverviewToggle.textContent = 'Read more';
+
+  requestAnimationFrame(() => {
+    const shouldCollapse = metadataOverview.scrollHeight > metadataOverview.clientHeight + 8 || metadataOverview.textContent.trim().length > 280;
+    if (!shouldCollapse) return;
+    metadataOverview.classList.add('collapsed');
+    metadataOverviewToggle.classList.remove('hidden');
+  });
+}
+
+function formatUsefulInfo(item) {
+  const text = String(item || '').trim();
+  const match = text.match(/^([^:]{2,32}):\s*(.+)$/);
+  if (!match) return escapeHtml(text);
+  const key = match[1];
+  const val = match[2];
+  return `<div style="display:flex; align-items:baseline; margin-bottom: 8px; font-size: 13px; line-height: 1.5;">
+    <span style="color:var(--text-dim); text-transform:uppercase; font-size:11px; font-weight:600; letter-spacing:0.5px; width:100px; flex-shrink:0;">${escapeHtml(key)}</span>
+    <span style="display:inline-flex; flex-wrap:wrap; gap:4px; color:var(--text);">
+      ${val.split(', ').map(v => `<a href="javascript:void(0)" onclick="toggleTagFilter('${escapeHtml(v.replace(/'/g, "\\'"))}'); document.getElementById('metadataPanel').classList.remove('open');" style="color:inherit; text-decoration:none; cursor:pointer; transition:color 0.15s ease;" onmouseover="this.style.color='var(--text-accent)'" onmouseout="this.style.color='var(--text)'">${escapeHtml(v)}</a>`).join('<span style="color:var(--text-dim);">,</span> ')}
+    </span>
+  </div>`;
+}
+
+function formatSourceStatus(sourceStatus) {
+  if (!sourceStatus || !sourceStatus.length) return 'TVMaze';
+  return sourceStatus
+    .map((source) => source.available ? source.name : `${source.name} unavailable`)
+    .join(', ');
+}
+
+function resetPersonModal(person = null) {
+  personName.textContent = person?.name || 'Cast detail';
+  personSubtitle.textContent = person?.role || 'Loading actor and actress details...';
+  personMeta.innerHTML = '';
+  personLinks.innerHTML = '';
+  personBio.textContent = person?.bio || 'No biography loaded yet.';
+  personFacts.innerHTML = '';
+  personKnownFor.innerHTML = '';
+  if (person?.photoUrl) {
+    personPoster.src = person.photoUrl;
+    personPoster.style.visibility = 'visible';
+  } else {
+    personPoster.removeAttribute('src');
+    personPoster.style.visibility = 'hidden';
+  }
+}
+
+function fillPersonModal(person) {
+  resetPersonModal(person);
+  const metaItems = uniqueValues([
+    person.role,
+    ...(person.sources || []).map((source) => `${source} source`),
+  ]);
+  personMeta.innerHTML = metaItems.map((item) => `<span>${escapeHtml(item)}</span>`).join('');
+  personLinks.innerHTML = (person.links || []).map((link) => `<span>${escapeHtml(link.label)}</span>`).join('');
+  if (person.facts?.length) {
+    personFacts.innerHTML = person.facts.map((fact) => `<span>${escapeHtml(fact)}</span>`).join('');
+  } else {
+    personFacts.innerHTML = '<span>No extra facts loaded</span>';
+  }
+  if (person.knownFor?.length) {
+    personKnownFor.innerHTML = person.knownFor.map((title) => `<span>${escapeHtml(title)}</span>`).join('');
+  } else {
+    personKnownFor.innerHTML = '<span>No known-for titles available</span>';
+  }
+}
+
+async function openPersonModal(person) {
+  const lookupToken = ++currentPersonLookupToken;
+  personModal.classList.remove('hidden');
+  resetPersonModal(person);
+  fillPersonModal(person);
+
+  try {
+    const response = await api.lookupPersonDetails({ person });
+    if (lookupToken !== currentPersonLookupToken) return;
+    if (response?.person) fillPersonModal(response.person);
+  } catch {
+    if (lookupToken !== currentPersonLookupToken) return;
+    personSubtitle.textContent = person?.role || 'Details unavailable';
+  }
+}
+
+function closePersonModal() {
+  currentPersonLookupToken += 1;
+  personModal.classList.add('hidden');
+}
+
+function uniqueValues(values) {
+  const seen = new Set();
+  const output = [];
+  const visit = (value) => {
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    const normalized = String(value || '').trim();
+    if (!normalized) return;
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    output.push(normalized);
+  };
+  visit(values);
+  return output;
+}
+
+function buildFolderTagsMarkup(tags) {
+  if (!tags || !tags.length) return '';
+  return `
+    <div class="card-tags folder-tags">
+      ${tags.map((tag, index) => `
+        <button
+          type="button"
+          class="folder-tag level-${Math.min(index, 4)}${activeTagFilters.includes(tag) ? ' active' : ''}"
+          data-filter-tag="${escapeHtml(tag)}"
+          title="Filter by ${escapeHtml(tag)}"
+        >${escapeHtml(tag)}</button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function buildBreadcrumbsMarkup(tags) {
+  if (!tags || !tags.length) return '';
+  return `
+    <div class="player-breadcrumbs folder-tags">
+      ${tags.map((tag, index) => `
+        <button
+          type="button"
+          class="folder-tag level-${Math.min(index, 4)}${activeTagFilters.includes(tag) ? ' active' : ''}"
+          data-filter-tag="${escapeHtml(tag)}"
+          title="Filter by ${escapeHtml(tag)}"
+        >${escapeHtml(tag)}</button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderActiveTagFilters() {
+  const hasFilters = activeTagFilters.length > 0;
+  filterStrip.classList.remove('hidden');
+  clearFiltersBtn.classList.toggle('hidden', !hasFilters);
+  filterStripEmpty.style.display = hasFilters ? 'none' : '';
+  activeTagFiltersEl.innerHTML = hasFilters
+    ? activeTagFilters.map((tag, index) => `
+        <button
+          type="button"
+          class="folder-tag level-${Math.min(index, 4)} active"
+          data-active-filter="${escapeHtml(tag)}"
+          title="Remove ${escapeHtml(tag)}"
+        >${escapeHtml(tag)} ×</button>
+      `).join('')
+    : '';
+
+  activeTagFiltersEl.querySelectorAll('[data-active-filter]').forEach((button) => {
+    button.addEventListener('click', () => {
+      removeTagFilter(button.dataset.activeFilter);
+    });
+  });
+}
+
+function toggleTagFilter(tag) {
+  if (!tag) return;
+  if (activeTagFilters.includes(tag)) {
+    activeTagFilters = activeTagFilters.filter((value) => value !== tag);
+  } else {
+    activeTagFilters = [...activeTagFilters, tag];
+  }
+  filterVideos();
+}
+
+function removeTagFilter(tag) {
+  activeTagFilters = activeTagFilters.filter((value) => value !== tag);
+  filterVideos();
+}
+
+function clearTagFilters() {
+  activeTagFilters = [];
+  filterVideos();
+}
+
+// ── Overlay ──
+function showOverlay(msg) {
+  overlay.classList.remove('hidden');
+  spinnerEl.style.display = '';
+  statusText.textContent = msg;
+  statusText.classList.remove('error-text');
+}
+function showError(msg) {
+  overlay.classList.remove('hidden');
+  spinnerEl.style.display = 'none';
+  statusText.textContent = msg;
+  statusText.classList.add('error-text');
+}
+function hideOverlay() { overlay.classList.add('hidden'); }
+
+// ── Utilities ──
+function fmtSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
+  return (bytes / 1073741824).toFixed(2) + ' GB';
+}
+
+function fmtDuration(seconds) {
+  if (!isFinite(seconds) || seconds <= 0) return '';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (h > 0) return `⏱ ${h}h ${m}m`;
+  return `⏱ ${m}m ${s}s`;
+}
+
+function fmtDate(isoDate) {
+  return new Date(isoDate).toLocaleDateString();
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Keyboard: Escape to close player
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !document.fullscreenElement) {
+    if (currentVideo && playerWrap && !playerWrap.classList.contains('hidden')) {
+      // Don't close player on Escape — let Plyr handle fullscreen exit
+    }
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<svg viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00FFC2" />
+      <stop offset="100%" stop-color="#8B5CF6" />
+    </linearGradient>
+    <linearGradient id="playGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#D0E8FF" />
+    </linearGradient>
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+    <filter id="playShadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#003366" flood-opacity="0.3"/>
+    </filter>
+    <filter id="gloss" x="0%" y="0%" width="100%" height="100%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" result="blur"/>
+    </filter>
+  </defs>
+
+  <!-- App Tile Base -->
+  <rect x="24" y="24" width="208" height="208" rx="56" fill="url(#bgGrad)" filter="url(#dropShadow)" />
+
+  <!-- Gloss rim -->
+  <rect x="24" y="24" width="208" height="208" rx="56" fill="none" stroke="#FFFFFF" stroke-opacity="0.28" stroke-width="2.5" />
+
+  <!-- Top-left glass shine -->
+  <ellipse cx="88" cy="72" rx="72" ry="44" fill="#FFFFFF" fill-opacity="0.12" />
+
+  <!-- Play Icon: same path as sidebar logo, scaled 7.5x and centered at 128,128 -->
+  <!-- Source path in 24x24: M8.5 5.86 c0,-1.12 1.23,-1.8 2.18,-1.2 l9.64,5.92 c.92,.57 .92,1.94 0,2.5 l-9.64,5.92 c-.95,.59 -2.18,-.08 -2.18,-1.2 V5.86 Z -->
+  <!-- Shape center in 24x24 space ≈ (14.41, 11.87) — translated to 128,128 and scaled 7.5x -->
+  <g transform="translate(128,128) scale(7.5) translate(-14.41,-11.87)">
+    <path d="M8.5 5.86 c0,-1.12 1.23,-1.8 2.18,-1.2 l9.64,5.92 c.92,.57 .92,1.94 0,2.5 l-9.64,5.92 c-.95,.59 -2.18,-.08 -2.18,-1.2 V5.86 Z"
+      fill="url(#playGrad)" filter="url(#playShadow)"/>
+  </g>
+</svg>
