@@ -54,6 +54,15 @@ jobs:
           node scripts/make-icns.js
           iconutil -c icns AppIcon.iconset -o icon.icns
 
+      - name: Generate icon.ico from SVG (Windows only)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: node scripts/make-ico.js
+
+      - name: Generate icon.png from SVG (Linux only)
+        if: matrix.os == 'ubuntu-latest'
+        run: node scripts/make-png.js
+
       - name: Build
         shell: bash
         run: npm run build -- ${{ matrix.args }} --publish never

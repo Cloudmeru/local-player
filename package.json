@@ -1,6 +1,6 @@
 {
   "name": "local-player",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Local video player with Plyr + hls.js and sprite preview thumbnails",
   "main": "main.js",
   "scripts": {
