@@ -1,6 +1,6 @@
 {
   "name": "local-player",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Local video player with Plyr + hls.js and sprite preview thumbnails",
   "main": "main.js",
   "scripts": {
@@ -26,9 +26,11 @@
       "target": "nsis"
     },
     "mac": {
+      "icon": "icon.png",
       "target": "dmg"
     },
     "linux": {
+      "icon": "icon.png",
       "target": "AppImage"
     }
   },

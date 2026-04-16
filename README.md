@@ -10,7 +10,9 @@ A desktop video player built with **Electron**, **Plyr**, and **hls.js** — fea
 
 | Platform | Link |
 |----------|------|
-| Windows  | [⬇ Local Player Setup 1.0.2.exe](https://github.com/Cloudmeru/local-player/releases/latest/download/Local.Player.Setup.1.0.2.exe) |
+| Windows  | [⬇ Local Player Setup 1.0.3.exe](https://github.com/Cloudmeru/local-player/releases/latest/download/Local.Player.Setup.1.0.3.exe) |
+| macOS    | [⬇ Local Player-1.0.3.dmg](https://github.com/Cloudmeru/local-player/releases/latest/download/Local.Player-1.0.3.dmg) |
+| Linux    | [⬇ Local Player-1.0.3.AppImage](https://github.com/Cloudmeru/local-player/releases/latest/download/Local.Player-1.0.3.AppImage) |
 
 > No admin rights required — installs per-user. FFmpeg is **bundled** — no extra software needed. Get all releases [here](https://github.com/Cloudmeru/local-player/releases).
 

@@ -1,0 +1,58 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            args: --win
+            artifact: "dist/*.exe"
+          - os: macos-latest
+            args: --mac
+            artifact: "dist/*.dmg"
+          - os: ubuntu-latest
+            args: --linux
+            artifact: "dist/*.AppImage"
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Copy vendor assets
+        shell: bash
+        run: |
+          mkdir -p vendor
+          cp node_modules/plyr/dist/plyr.css vendor/
+          cp node_modules/plyr/dist/plyr.polyfilled.min.js vendor/
+          cp node_modules/plyr/dist/plyr.svg vendor/
+          cp node_modules/hls.js/dist/hls.min.js vendor/
+
+      - name: Build
+        run: npm run build -- ${{ matrix.args }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.artifact }}
