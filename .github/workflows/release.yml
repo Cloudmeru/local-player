@@ -36,6 +36,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
+        shell: bash
         run: npm ci
 
       - name: Copy vendor assets
@@ -48,9 +49,8 @@ jobs:
           cp node_modules/hls.js/dist/hls.min.js vendor/
 
       - name: Build
-        run: npm run build -- ${{ matrix.args }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: npm run build -- ${{ matrix.args }} --publish never
 
       - name: Upload artifacts to release
         uses: softprops/action-gh-release@v2

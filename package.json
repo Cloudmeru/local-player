@@ -1,6 +1,6 @@
 {
   "name": "local-player",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Local video player with Plyr + hls.js and sprite preview thumbnails",
   "main": "main.js",
   "scripts": {
@@ -31,6 +31,7 @@
     },
     "linux": {
       "icon": "icon.png",
+      "category": "AudioVideo",
       "target": "AppImage"
     }
   },
