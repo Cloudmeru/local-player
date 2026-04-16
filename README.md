@@ -6,6 +6,16 @@ A desktop video player built with **Electron**, **Plyr**, and **hls.js** — fea
 
 ---
 
+## Download
+
+| Platform | Link |
+|----------|------|
+| Windows  | [⬇ Local Player Setup 1.0.0.exe](https://github.com/Cloudmeru/local-player/releases/latest/download/Local.Player.Setup.1.0.0.exe) |
+
+> No admin rights required — installs per-user. Get all releases [here](https://github.com/Cloudmeru/local-player/releases).
+
+---
+
 ## Features
 
 - 🎬 **Multi-format playback** — MP4, MKV, AVI, WebM, MOV, TS, FLV, WMV, M4V, M3U8 (HLS)
