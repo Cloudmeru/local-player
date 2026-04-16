@@ -48,6 +48,12 @@ jobs:
           cp node_modules/plyr/dist/plyr.svg vendor/
           cp node_modules/hls.js/dist/hls.min.js vendor/
 
+      - name: Generate icon.icns from SVG (macOS only)
+        if: matrix.os == 'macos-latest'
+        run: |
+          node scripts/make-icns.js
+          iconutil -c icns AppIcon.iconset -o icon.icns
+
       - name: Build
         shell: bash
         run: npm run build -- ${{ matrix.args }} --publish never

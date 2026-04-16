@@ -2,3 +2,5 @@ node_modules/
 dist/
 dist-verify/
 dist-verify-letterboxd/
+AppIcon.iconset/
+icon.icns
