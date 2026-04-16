@@ -4,6 +4,16 @@ const fs = require('fs');
 const { execFile, spawn } = require('child_process');
 const { pathToFileURL } = require('url');
 
+// Resolve bundled ffmpeg-static binary, with fallback to system PATH
+function resolveFfmpegPath() {
+  try {
+    const staticPath = require('ffmpeg-static');
+    if (staticPath && fs.existsSync(staticPath)) return staticPath;
+  } catch (_) {}
+  return 'ffmpeg';
+}
+const FFMPEG_BIN = resolveFfmpegPath();
+
 const VIDEO_EXTS = ['.mp4', '.mkv', '.avi', '.webm', '.ts', '.mov', '.m4v', '.flv', '.wmv', '.m3u8'];
 
 const MIME_TYPES = {
@@ -1415,7 +1425,7 @@ ipcMain.handle('generate-poster', async (event, videoPath) => {
   const seekTime = Math.max(1, Math.floor(duration * 0.1));
 
   return new Promise((resolve) => {
-    execFile('ffmpeg', [
+    execFile(FFMPEG_BIN, [
       '-ss', String(seekTime),
       '-i', videoPath,
       '-vframes', '1',
@@ -1456,7 +1466,7 @@ ipcMain.handle('generate-sprites', async (event, videoPath) => {
 
   try {
     await new Promise((resolve, reject) => {
-      const proc = spawn('ffmpeg', [
+      const proc = spawn(FFMPEG_BIN, [
         '-i', videoPath,
         '-vf', `fps=1/${interval},scale=${thumbW}:${thumbH},tile=${cols}x${rows}`,
         '-q:v', '5',
@@ -1523,7 +1533,7 @@ ipcMain.handle('generate-sprites', async (event, videoPath) => {
 // ── IPC: ffmpeg check ──
 ipcMain.handle('check-ffmpeg', () => {
   return new Promise((resolve) => {
-    execFile('ffmpeg', ['-version'], { timeout: 5000 }, (err) => resolve(!err));
+    execFile(FFMPEG_BIN, ['-version'], { timeout: 5000 }, (err) => resolve(!err));
   });
 });
 
