@@ -1,6 +1,6 @@
 {
   "name": "local-player",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Local video player with Plyr + hls.js and sprite preview thumbnails",
   "main": "main.js",
   "scripts": {
@@ -23,15 +23,18 @@
     ],
     "win": {
       "icon": "icon.ico",
+      "artifactName": "LocalPlayer-Setup.exe",
       "target": "nsis"
     },
     "mac": {
       "icon": "icon.icns",
+      "artifactName": "LocalPlayer.dmg",
       "target": "dmg"
     },
     "linux": {
       "icon": "icon.png",
       "category": "AudioVideo",
+      "artifactName": "LocalPlayer.AppImage",
       "target": "AppImage"
     }
   },
